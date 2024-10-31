@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"user-management-service/pkg/handler"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
@@ -42,7 +43,7 @@ func initDB() {
 	if err != nil {
 		panic(err)
 	}
-	defer DB.Close()
+	
 
 	err = DB.Ping()
 	if err != nil {
@@ -54,14 +55,15 @@ func initDB() {
 
 func main() {
 	initDB()
-	defer DB.Close()
+
 
 	gRouter := mux.NewRouter()
 
 	gRouter.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		Tmpl.ExecuteTemplate(w, "home.html", nil)
 	})
-
+	gRouter.HandleFunc("/register", handler.RegisterPage(DB, Tmpl)).Methods("GET")
+	gRouter.HandleFunc("/register", handler.RegisterHandler(DB, Tmpl)).Methods("POST")
 	http.ListenAndServe(":8080", gRouter)
 
 }

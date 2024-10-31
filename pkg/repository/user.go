@@ -9,7 +9,7 @@ import (
 func GetAllUsers(db *sql.DB) ([]models.User, error) {
 	users := []models.User{}
 
-	query := "SELECT id, email, password, name, category, dob, bio, avatar FROM users"
+	query := "SELECT id, email, password, name, category, dob, bio, avatar FROM user"
 	rows, err := db.Query(query)
 
 	if err != nil {
@@ -37,7 +37,7 @@ func GetAllUsers(db *sql.DB) ([]models.User, error) {
 func GetUserById(db *sql.DB, id string) (models.User, error) {
 	var user models.User
 
-	err := db.QueryRow("SELECT id, email, password, name, category, dob, bio, avatar FROM users WHERE id = ?", id).Scan(&user.Id, &user.Email, &user.Password, &user.Name, &user.Category, &user.DOB, &user.Bio, &user.Avatar)
+	err := db.QueryRow("SELECT id, email, password, name, category, dob, bio, avatar FROM user WHERE id = ?", id).Scan(&user.Id, &user.Email, &user.Password, &user.Name, &user.Category, &user.DOB, &user.Bio, &user.Avatar)
 
 	if err != nil {
 		return user, err
@@ -51,7 +51,7 @@ func GetUserById(db *sql.DB, id string) (models.User, error) {
 func GetUserByEmail(db *sql.DB, email string) (models.User, error) {
 	var user models.User
 
-	err := db.QueryRow("SELECT id, email, password, name, category, dob, bio, avatar FROM users WHERE email = ?", email).Scan(&user.Id, &user.Email, &user.Password, &user.Name, &user.Category, &user.DOB, &user.Bio, &user.Avatar)
+	err := db.QueryRow("SELECT id, email, password, name, category, dob, bio, avatar FROM user WHERE email = ?", email).Scan(&user.Id, &user.Email, &user.Password, &user.Name, &user.Category, &user.DOB, &user.Bio, &user.Avatar)
 
 	return user, err
 }
@@ -66,7 +66,8 @@ func CreateUser(db *sql.DB, user models.User) error {
 	//Convert id to string and set it on the user
 	user.Id = id.String()
 
-	stmt, err := db.Prepare("INSERT INTO users (id, email, password, name, category, dob, bio, avatar) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+	stmt, err := db.Prepare(`INSERT INTO "user" (id, email, password, name, category, dob, bio, avatar) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`)
+
 
 	if err != nil {
 		return err
@@ -82,16 +83,16 @@ func CreateUser(db *sql.DB, user models.User) error {
 	return nil
 }
 func UpdateUser(db *sql.DB, id string, user models.User) error {
-	_, err := db.Exec("UPDATE users SET name = ?, category = ?, dob = ?, bio = ? WHERE id = ?", user.Name, user.Category, user.DOB, user.Bio, id)
+	_, err := db.Exec("UPDATE user SET name = ?, category = ?, dob = ?, bio = ? WHERE id = ?", user.Name, user.Category, user.DOB, user.Bio, id)
 
 	return err
 }
 func UpdateUserAvatar(db *sql.DB, userID, filePath string) error {
-	_, err := db.Exec("UPDATE users SET avatar = ? WHERE id = ?", filePath, userID)
+	_, err := db.Exec("UPDATE user SET avatar = ? WHERE id = ?", filePath, userID)
 	return err
 }
 func DeleteUser(db *sql.DB, id string) error {
-	_, err := db.Exec("DELETE FROM users WHERE id = ?", id)
+	_, err := db.Exec("DELETE FROM user WHERE id = ?", id)
 
 	return err
 }
